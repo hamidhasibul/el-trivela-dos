@@ -1,11 +1,31 @@
-import { PrismaClient } from "@prisma/client";
+import { Location, PRICE_TYPE, PrismaClient, Turf_type } from "@prisma/client";
 import Header from "./components/Header";
 import TurfCard from "./components/TurfCard";
 
+export interface TurfCardType {
+  id: number;
+  name: string;
+  slug: string;
+  main_image: string;
+  turf_type: Turf_type;
+  price_type: PRICE_TYPE;
+  location: Location;
+}
+
 const prisma = new PrismaClient();
 
-const fetchTurfs = async () => {
-  const turfs = await prisma.turf.findMany();
+const fetchTurfs = async (): Promise<TurfCardType[]> => {
+  const turfs = await prisma.turf.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      main_image: true,
+      turf_type: true,
+      price_type: true,
+      location: true,
+    },
+  });
 
   return turfs;
 };
@@ -13,14 +33,16 @@ const fetchTurfs = async () => {
 export default async function Home() {
   const turfs = await fetchTurfs();
 
-  console.log(turfs);
   return (
     <main>
       <Header />
       {/* CARDS */}
       <div className="py-3 px-36 mt-10 flex flex-wrap justify-center">
         {/* CARD */}
-        <TurfCard />
+        {turfs.map((turf) => (
+          <TurfCard key={turf.id} turf={turf} />
+        ))}
+
         {/* CARD */}
       </div>
       {/* CARDS */}
