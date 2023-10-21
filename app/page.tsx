@@ -1,30 +1,29 @@
-import Navbar from "./components/Navbar";
+import { PrismaClient } from "@prisma/client";
 import Header from "./components/Header";
 import TurfCard from "./components/TurfCard";
 
-export default function Home() {
+const prisma = new PrismaClient();
+
+const fetchTurfs = async () => {
+  const turfs = await prisma.turf.findMany();
+
+  return turfs;
+};
+
+export default async function Home() {
+  const turfs = await fetchTurfs();
+
+  console.log(turfs);
   return (
-    <main className="bg-gray-100 min-h-screen w-screen">
-      <main className="max-w-screen-2xl m-auto bg-white">
-        {/* NAVBAR */}
-        <Navbar />
-        {/* NAVBAR */}
-        <main>
-          {/* HEADER */}
-          <Header />
-          {/* HEADER */}
-
-          {/* CARDS */}
-          <div className="py-3 px-36 mt-10 flex flex-wrap justify-center">
-            {/* CARD */}
-
-            <TurfCard />
-
-            {/* CARD */}
-          </div>
-          {/* CARDS */}
-        </main>
-      </main>
+    <main>
+      <Header />
+      {/* CARDS */}
+      <div className="py-3 px-36 mt-10 flex flex-wrap justify-center">
+        {/* CARD */}
+        <TurfCard />
+        {/* CARD */}
+      </div>
+      {/* CARDS */}
     </main>
   );
 }
