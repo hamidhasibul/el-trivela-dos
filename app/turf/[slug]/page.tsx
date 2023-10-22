@@ -42,11 +42,11 @@ const TurfDetailsPage = async ({ params }: { params: { slug: string } }) => {
   return (
     <>
       <div className="bg-white w-[70%] rounded p-3 shadow">
-        <TurfNavbar />
+        <TurfNavbar slug={turf.slug} />
         <Title name={turf.name} />
         <Rating />
-        <Description />
-        <Images />
+        <Description description={turf.description} />
+        <Images images={turf.images} />
         <Reviews />
       </div>
       {/* DESCRIPTION PORTION */}
