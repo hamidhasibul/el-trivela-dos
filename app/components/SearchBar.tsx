@@ -13,7 +13,7 @@ const SearchBar = () => {
   const handleSearch = () => {
     if (location === "") return;
 
-    router.push("/search");
+    router.push(`/search?city=${location}`);
   };
   return (
     <div className="text-left text-lg py-3 m-auto flex justify-center">

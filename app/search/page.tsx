@@ -1,6 +1,5 @@
-import Link from "next/link";
 import React from "react";
-import Navbar from "../components/Navbar";
+
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
 import TurfCard from "./components/TurfCard";
