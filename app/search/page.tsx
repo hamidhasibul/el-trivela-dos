@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PRICE_TYPE, PrismaClient } from "@prisma/client";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
 import TurfCard from "./components/TurfCard";
 
 const prisma = new PrismaClient();
 
-const fetchTurfsByCity = async (city: string) => {
+const fetchTurfsByCity = async (city: string | undefined) => {
   const select = {
     id: true,
     name: true,
@@ -22,7 +22,7 @@ const fetchTurfsByCity = async (city: string) => {
     where: {
       location: {
         name: {
-          equals: city,
+          equals: city.toLowerCase(),
         },
       },
     },
@@ -42,9 +42,9 @@ const fetchLocationTurfType = async () => {
 const SearchPage = async ({
   searchParams,
 }: {
-  searchParams: { city: string };
+  searchParams: { city?: string; turf_type?: string; price_type?: PRICE_TYPE };
 }) => {
-  const turfs = await fetchTurfsByCity(searchParams.city.toLowerCase());
+  const turfs = await fetchTurfsByCity(searchParams.city);
   const { locations, turfTypes } = await fetchLocationTurfType();
 
   return (
@@ -53,7 +53,11 @@ const SearchPage = async ({
       <div className="flex py-4 m-auto w-3/4 justify-between items-start">
         {/* SEARCH SIDE BAR */}
         <div className="w-1/5">
-          <SideBar locations={locations} turfTypes={turfTypes} />
+          <SideBar
+            locations={locations}
+            turfTypes={turfTypes}
+            searchParams={searchParams}
+          />
         </div>
 
         {/* SEARCH SIDE BAR */}
