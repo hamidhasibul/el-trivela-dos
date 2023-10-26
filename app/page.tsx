@@ -1,4 +1,10 @@
-import { Location, PRICE_TYPE, PrismaClient, Turf_type } from "@prisma/client";
+import {
+  Location,
+  PRICE_TYPE,
+  PrismaClient,
+  Review,
+  Turf_type,
+} from "@prisma/client";
 import Header from "./components/Header";
 import TurfCard from "./components/TurfCard";
 
@@ -10,6 +16,7 @@ export interface TurfCardType {
   turf_type: Turf_type;
   price_type: PRICE_TYPE;
   location: Location;
+  reviews: Review[];
 }
 
 const prisma = new PrismaClient();
@@ -24,6 +31,7 @@ const fetchTurfs = async (): Promise<TurfCardType[]> => {
       turf_type: true,
       price_type: true,
       location: true,
+      reviews: true,
     },
   });
 

@@ -16,7 +16,7 @@ const TurfCard = ({ turf }: Props) => {
           <h3 className="font-bold text-2xl mb-2">{turf.name}</h3>
           <div className="flex items-start">
             <div className="flex mb-2">*****</div>
-            <p className="ml-2">77 reviews</p>
+            <p className="ml-2">{turf.reviews.length} reviews</p>
           </div>
           <div className="flex text-reg font-light capitalize">
             <p className=" mr-3">{turf.turf_type.name}</p>

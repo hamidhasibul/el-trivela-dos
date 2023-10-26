@@ -1,9 +1,20 @@
 import Price from "@/app/components/Price";
 import { TurfCardType } from "@/app/page";
+import { calcReviewAvg } from "@/utils/calcReviewsAvg";
 import Link from "next/link";
 import React from "react";
 
 const TurfCard = ({ turf }: { turf: TurfCardType }) => {
+  const renderRating = () => {
+    const rating = calcReviewAvg(turf.reviews);
+
+    if (rating > 4.5) {
+      return "Awesome";
+    } else {
+      return "Mid";
+    }
+  };
+
   return (
     <>
       {/* Turf CARD */}
@@ -13,7 +24,7 @@ const TurfCard = ({ turf }: { turf: TurfCardType }) => {
           <h2 className="text-3xl">{turf.name}</h2>
           <div className="flex items-start">
             <div className="flex mb-2">*****</div>
-            <p className="ml-2 text-sm">Awesome</p>
+            <p className="ml-2 text-sm">{renderRating()}</p>
           </div>
           <div className="mb-9">
             <div className="font-light flex text-reg">

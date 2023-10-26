@@ -22,6 +22,7 @@ const fetchTurfsByCity = async (searchParams: SearchParams) => {
     slug: true,
     location: true,
     turf_type: true,
+    reviews: true,
   };
 
   if (searchParams.city) {
