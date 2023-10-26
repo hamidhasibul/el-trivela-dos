@@ -5,7 +5,15 @@ import TurfCard from "./components/TurfCard";
 
 const prisma = new PrismaClient();
 
-const fetchTurfsByCity = async (city: string | undefined) => {
+interface SearchParams {
+  city?: string;
+  turf_type?: string;
+  price_type?: PRICE_TYPE;
+}
+
+const fetchTurfsByCity = async (searchParams: SearchParams) => {
+  const where: any = {};
+
   const select = {
     id: true,
     name: true,
@@ -16,16 +24,38 @@ const fetchTurfsByCity = async (city: string | undefined) => {
     turf_type: true,
   };
 
-  if (!city) return await prisma.turf.findMany({ select });
+  if (searchParams.city) {
+    const location = {
+      name: {
+        equals: searchParams.city.toLowerCase(),
+      },
+    };
+
+    where.location = location;
+  }
+
+  if (searchParams.turf_type) {
+    const turf_type = {
+      name: {
+        equals: searchParams.turf_type.toLowerCase(),
+      },
+    };
+
+    where.turf_type = turf_type;
+  }
+
+  if (searchParams.price_type) {
+    const price_type = {
+      equals: searchParams.price_type,
+    };
+
+    where.price_type = price_type;
+  }
+
+  // if (!city) return await prisma.turf.findMany({ select });
 
   const turfs = await prisma.turf.findMany({
-    where: {
-      location: {
-        name: {
-          equals: city.toLowerCase(),
-        },
-      },
-    },
+    where,
     select,
   });
 
@@ -39,12 +69,8 @@ const fetchLocationTurfType = async () => {
   return { locations, turfTypes };
 };
 
-const SearchPage = async ({
-  searchParams,
-}: {
-  searchParams: { city?: string; turf_type?: string; price_type?: PRICE_TYPE };
-}) => {
-  const turfs = await fetchTurfsByCity(searchParams.city);
+const SearchPage = async ({ searchParams }: { searchParams: SearchParams }) => {
+  const turfs = await fetchTurfsByCity(searchParams);
   const { locations, turfTypes } = await fetchLocationTurfType();
 
   return (
