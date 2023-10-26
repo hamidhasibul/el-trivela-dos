@@ -11,12 +11,7 @@ const SearchBar = () => {
   // Functions
 
   const handleSearch = () => {
-    if (location) {
-      router.push(`/search?city=${location}`);
-    }
-
-    router.push(`/search`);
-
+    router.push(`/search?city=${location}`);
     setLocation("");
   };
   return (
