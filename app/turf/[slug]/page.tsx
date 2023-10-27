@@ -6,6 +6,7 @@ import Images from "./components/Images";
 import Reviews from "./components/Reviews";
 import ReservationCard from "./components/ReservationCard";
 import { PrismaClient, Review } from "@prisma/client";
+import { notFound } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -33,7 +34,9 @@ const fetchTurfBySlug = async (slug: string): Promise<Turf> => {
     },
   });
 
-  if (!turf) throw new Error();
+  if (!turf) {
+    notFound();
+  }
 
   return turf;
 };
@@ -46,7 +49,7 @@ const TurfDetailsPage = async ({ params }: { params: { slug: string } }) => {
       <div className="bg-white w-[70%] rounded p-3 shadow">
         <TurfNavbar slug={turf.slug} />
         <Title name={turf.name} />
-        <Rating />
+        <Rating reviews={turf.reviews} />
         <Description description={turf.description} />
         <Images images={turf.images} />
         <Reviews reviews={turf.reviews} />

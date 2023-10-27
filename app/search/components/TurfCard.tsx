@@ -1,4 +1,5 @@
 import Price from "@/app/components/Price";
+import { Stars } from "@/app/components/Stars";
 import { TurfCardType } from "@/app/page";
 import { calcReviewAvg } from "@/utils/calcReviewsAvg";
 import Link from "next/link";
@@ -23,7 +24,9 @@ const TurfCard = ({ turf }: { turf: TurfCardType }) => {
         <div className="pl-5">
           <h2 className="text-3xl">{turf.name}</h2>
           <div className="flex items-start">
-            <div className="flex mb-2">*****</div>
+            <div className="flex mb-2">
+              <Stars reviews={turf.reviews} />
+            </div>
             <p className="ml-2 text-sm">{renderRating()}</p>
           </div>
           <div className="mb-9">

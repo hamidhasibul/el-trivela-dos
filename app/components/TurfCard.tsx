@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { TurfCardType } from "../page";
 import Price from "./Price";
+import { Stars } from "./Stars";
 
 interface Props {
   turf: TurfCardType;
@@ -15,7 +16,9 @@ const TurfCard = ({ turf }: Props) => {
         <div className="p-1">
           <h3 className="font-bold text-2xl mb-2">{turf.name}</h3>
           <div className="flex items-start">
-            <div className="flex mb-2">*****</div>
+            <div className="flex mb-2">
+              <Stars reviews={turf.reviews} />
+            </div>
             <p className="ml-2">{turf.reviews.length} reviews</p>
           </div>
           <div className="flex text-reg font-light capitalize">
