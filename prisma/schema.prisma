@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,12 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum PRICE_TYPE {
-  BUDGET
-  STANDARD
-  PREMIUM
 }
 
 model Turf {
@@ -26,14 +17,14 @@ model Turf {
   open_time    String
   close_time   String
   price_type   PRICE_TYPE
-  grounds      Ground[]
   location_id  Int
-  location     Location   @relation(fields: [location_id], references: [id])
   turf_type_id Int
-  turf_type    Turf_type  @relation(fields: [turf_type_id], references: [id])
-  reviews      Review[]
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
+  grounds      Ground[]
+  reviews      Review[]
+  location     Location   @relation(fields: [location_id], references: [id])
+  turf_type    Turf_type  @relation(fields: [turf_type_id], references: [id])
 }
 
 model Ground {
@@ -41,26 +32,26 @@ model Ground {
   name        String
   price       String
   description String
-  created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   turf_id     Int
+  created_at  DateTime @default(now())
   turf        Turf     @relation(fields: [turf_id], references: [id])
 }
 
 model Location {
   id         Int      @id @default(autoincrement())
   name       String
-  turfs      Turf[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  turfs      Turf[]
 }
 
 model Turf_type {
   id         Int      @id @default(autoincrement())
   name       String
-  turfs      Turf[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  turfs      Turf[]
 }
 
 model User {
@@ -68,12 +59,12 @@ model User {
   first_name String
   last_name  String
   city       String
-  email      String
+  email      String   @unique
   password   String
   phone      String
-  reviews    Review[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  reviews    Review[]
 }
 
 model Review {
@@ -83,7 +74,13 @@ model Review {
   text       String
   rating     Float
   turf_id    Int
-  turf       Turf   @relation(fields: [turf_id], references: [id])
   user_id    Int
+  turf       Turf   @relation(fields: [turf_id], references: [id])
   user       User   @relation(fields: [user_id], references: [id])
+}
+
+enum PRICE_TYPE {
+  BUDGET
+  STANDARD
+  PREMIUM
 }
