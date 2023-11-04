@@ -2,15 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import * as jose from "jose";
-
-/* interface UserReq {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  city: string;
-  password: string;
-} */
+import { cookies } from "next/headers";
 
 const prisma = new PrismaClient();
 
@@ -45,10 +37,10 @@ export async function POST(request: Request) {
     },
     {
       valid: validator.isLength(city, { min: 1 }),
-      errorMessage: "Phone Number is invalid!",
+      errorMessage: "City is invalid!",
     },
     {
-      valid: validator.isStrongPassword(password),
+      valid: validator.isLength(password, { min: 5 }),
       errorMessage: "Password is invalid!",
     },
   ];
@@ -60,7 +52,7 @@ export async function POST(request: Request) {
   });
 
   if (errors.length) {
-    return new Response(JSON.stringify({ errorMessage: errors[0] }), {
+    return new Response(JSON.stringify({ message: errors[0] }), {
       status: 400,
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +69,7 @@ export async function POST(request: Request) {
   if (userWithEmail) {
     return new Response(
       JSON.stringify({
-        errorMessage: "You already have an account with this email.",
+        message: "You already have an account with this email.",
       }),
       {
         status: 400,
@@ -109,7 +101,18 @@ export async function POST(request: Request) {
     .setExpirationTime("24h")
     .sign(secret);
 
-  return new Response(JSON.stringify({ message: token }), {
-    status: 200,
-  });
+  cookies().set("jwt", token, { maxAge: 60 * 60 });
+
+  return new Response(
+    JSON.stringify({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      city: user.city,
+      phone: user.phone,
+    }),
+    {
+      status: 200,
+    }
+  );
 }

@@ -2,10 +2,13 @@ import { PrismaClient } from "@prisma/client";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import * as jose from "jose";
+import { setCookie } from "cookies-next";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest, res: NextResponse) {
   const { email, password } = await req.json();
 
   const errors: string[] = [];
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
   });
 
   if (errors.length) {
-    return new Response(JSON.stringify({ errorMessage: errors[0] }), {
+    return new Response(JSON.stringify({ message: errors[0] }), {
       status: 400,
       headers: {
         "Content-Type": "application/json",
@@ -38,13 +41,13 @@ export async function POST(req: Request) {
     });
   }
 
-  const userWithEmail = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email,
     },
   });
 
-  if (!userWithEmail) {
+  if (!user) {
     return new Response(
       JSON.stringify({ message: "You don't have an account!" }),
       {
@@ -53,7 +56,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const isMatch = await bcrypt.compare(password, userWithEmail.password);
+  const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
     return new Response(
@@ -67,12 +70,23 @@ export async function POST(req: Request) {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
   const alg = "HS256";
 
-  const token = await new jose.SignJWT({ email: userWithEmail.email })
+  const token = await new jose.SignJWT({ email: user.email })
     .setProtectedHeader({ alg })
     .setExpirationTime("24h")
     .sign(secret);
 
-  return new Response(JSON.stringify({ token: token }), {
-    status: 200,
-  });
+  cookies().set("jwt", token, { maxAge: 60 * 60 });
+
+  return new Response(
+    JSON.stringify({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      city: user.city,
+      phone: user.phone,
+    }),
+    {
+      status: 200,
+    }
+  );
 }
