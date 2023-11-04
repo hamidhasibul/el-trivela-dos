@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, createContext } from "react";
+import { getCookie } from "cookies-next";
+import { useState, createContext, useEffect } from "react";
 
 interface User {
   id: number;
@@ -30,10 +31,63 @@ export const AuthenticationContext = createContext<AuthState>({
 
 export const AuthContext = ({ children }: { children: React.ReactNode }) => {
   const [authState, setAuthState] = useState<State>({
-    loading: false,
+    loading: true,
     data: null,
     error: null,
   });
+
+  const fetchUser = async () => {
+    setAuthState({
+      loading: true,
+      error: null,
+      data: null,
+    });
+    try {
+      const jwt = getCookie("jwt");
+
+      if (!jwt) {
+        return setAuthState({
+          loading: false,
+          error: null,
+          data: null,
+        });
+      }
+
+      const response = await fetch(`http://localhost:3000/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        setAuthState({
+          loading: false,
+          error: null,
+          data: data,
+        });
+      } else {
+        const errorData = await response.json();
+
+        setAuthState({
+          loading: false,
+          error: errorData.message,
+          data: null,
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        loading: false,
+        error: error,
+        data: null,
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
   return (
     <AuthenticationContext.Provider value={{ ...authState, setAuthState }}>
       {children}

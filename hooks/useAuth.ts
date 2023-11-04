@@ -1,4 +1,5 @@
 import { AuthenticationContext } from "@/app/context/AuthContext";
+import { deleteCookie, getCookie } from "cookies-next";
 import { useContext } from "react";
 
 const useAuth = () => {
@@ -6,13 +7,16 @@ const useAuth = () => {
     AuthenticationContext
   );
 
-  const signin = async ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => {
+  const signin = async (
+    {
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    },
+    handleClose: () => void
+  ) => {
     setAuthState({
       loading: true,
       error: null,
@@ -30,23 +34,24 @@ const useAuth = () => {
           password,
         }),
       });
-
       if (response.ok) {
+        const data = await response.json();
         setAuthState({
           loading: false,
           error: null,
-          data: null,
+          data: data,
         });
 
-        const data = await response.json();
-
-        console.log(data);
+        handleClose();
       } else {
-        const error = await response.json();
-        throw new Error(`${error.message}`);
+        const errorData = await response.json();
+        setAuthState({
+          loading: false,
+          error: errorData.message,
+          data: null,
+        });
       }
     } catch (error: any) {
-      console.error(error);
       setAuthState({
         loading: false,
         error: error,
@@ -55,9 +60,82 @@ const useAuth = () => {
     }
   };
 
-  const signup = async () => {};
+  const signup = async (
+    {
+      email,
+      password,
+      firstName,
+      lastName,
+      city,
+      phone,
+    }: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      city: string;
+      phone: string;
+    },
+    handleClose: () => void
+  ) => {
+    setAuthState({
+      loading: true,
+      error: null,
+      data: null,
+    });
 
-  return { signin, signup };
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+          city,
+          phone,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAuthState({
+          loading: false,
+          error: null,
+          data: data,
+        });
+
+        handleClose();
+      } else {
+        const errorData = await response.json();
+
+        setAuthState({
+          loading: false,
+          error: errorData.message,
+          data: null,
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        loading: false,
+        error: error,
+        data: null,
+      });
+    }
+  };
+
+  const signout = () => {
+    deleteCookie("jwt");
+    setAuthState({
+      loading: false,
+      error: null,
+      data: null,
+    });
+  };
+
+  return { signin, signup, signout };
 };
 
 export default useAuth;

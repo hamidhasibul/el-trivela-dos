@@ -6,7 +6,7 @@ import Modal from "@mui/material/Modal";
 import AuthModalInputs from "./AuthModalInputs";
 import useAuth from "@/hooks/useAuth";
 import { AuthenticationContext } from "../context/AuthContext";
-import { CircularProgress } from "@mui/material";
+import { Alert, CircularProgress } from "@mui/material";
 
 const style = {
   position: "absolute" as "absolute",
@@ -24,7 +24,7 @@ export default function AuthModal({ isSignin }: { isSignin: boolean }) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const { signin } = useAuth();
+  const { signin, signup } = useAuth();
   const { loading, error, data } = useContext(AuthenticationContext);
 
   const [inputs, setInputs] = useState({
@@ -50,7 +50,19 @@ export default function AuthModal({ isSignin }: { isSignin: boolean }) {
 
   const handleClick = () => {
     if (isSignin) {
-      signin({ email: inputs.email, password: inputs.password });
+      signin({ email: inputs.email, password: inputs.password }, handleClose);
+    } else {
+      signup(
+        {
+          email: inputs.email,
+          password: inputs.password,
+          firstName: inputs.firstName,
+          lastName: inputs.lastName,
+          city: inputs.city,
+          phone: inputs.phone,
+        },
+        handleClose
+      );
     }
   };
 
@@ -102,6 +114,11 @@ export default function AuthModal({ isSignin }: { isSignin: boolean }) {
           ) : (
             <>
               <div className="p-2 h-[500px]">
+                {error ? (
+                  <Alert severity="error" className="mb-6">
+                    {error}
+                  </Alert>
+                ) : null}
                 <div className="uppercase font-bold text-center pb-2 border-b mb-2">
                   <p className="text-sm">
                     {renderContent("Sign in", "Create Account")}

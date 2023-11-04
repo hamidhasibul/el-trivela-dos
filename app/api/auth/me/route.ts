@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { use } from "react";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const bearerToken = req.headers.get("authorization") as string;
   const token = bearerToken.split(" ")[1];
 
@@ -29,7 +30,22 @@ export async function POST(req: Request) {
     },
   });
 
-  return new Response(JSON.stringify({ user }), {
-    status: 200,
-  });
+  if (!user) {
+    return new Response(JSON.stringify({ message: "User not found!" }), {
+      status: 401,
+    });
+  }
+
+  return new Response(
+    JSON.stringify({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      city: user.city,
+      email: user.email,
+      phone: user.phone,
+    }),
+    {
+      status: 200,
+    }
+  );
 }
