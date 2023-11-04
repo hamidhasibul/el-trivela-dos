@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   });
 
   if (errors.length) {
-    return new Response(JSON.stringify({ errorMessage: errors[0] }), {
+    return new Response(JSON.stringify({ message: errors[0] }), {
       status: 400,
       headers: {
         "Content-Type": "application/json",
