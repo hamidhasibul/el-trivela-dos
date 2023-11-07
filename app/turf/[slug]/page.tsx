@@ -5,7 +5,7 @@ import Description from "./components/Description";
 import Images from "./components/Images";
 import Reviews from "./components/Reviews";
 import ReservationCard from "./components/ReservationCard";
-import { PrismaClient, Review } from "@prisma/client";
+import { Ground, PrismaClient, Review } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 const prisma = new PrismaClient();
@@ -17,6 +17,9 @@ interface Turf {
   images: string[];
   slug: string;
   reviews: Review[];
+  grounds: Ground[];
+  open_time: string;
+  close_time: string;
 }
 
 const fetchTurfBySlug = async (slug: string): Promise<Turf> => {
@@ -31,6 +34,9 @@ const fetchTurfBySlug = async (slug: string): Promise<Turf> => {
       images: true,
       slug: true,
       reviews: true,
+      grounds: true,
+      open_time: true,
+      close_time: true,
     },
   });
 
@@ -57,7 +63,11 @@ const TurfDetailsPage = async ({ params }: { params: { slug: string } }) => {
       {/* DESCRIPTION PORTION */}
 
       {/* RESERVATION CARD PORTION */}
-      <ReservationCard />
+      <ReservationCard
+        grounds={turf.grounds}
+        openTime={turf.open_time}
+        closeTime={turf.close_time}
+      />
     </>
   );
 };

@@ -25,6 +25,8 @@ model Turf {
   reviews      Review[]
   location     Location   @relation(fields: [location_id], references: [id])
   turf_type    Turf_type  @relation(fields: [turf_type_id], references: [id])
+  bookings     Booking[]
+  fields       Field[]
 }
 
 model Ground {
@@ -77,6 +79,43 @@ model Review {
   user_id    Int
   turf       Turf   @relation(fields: [turf_id], references: [id])
   user       User   @relation(fields: [user_id], references: [id])
+}
+
+model Booking {
+  id                Int                @id @default(autoincrement())
+  party_size        Int
+  booking_time      DateTime
+  booker_email      String
+  booker_phone      String
+  booker_first_name String
+  booker_last_name  String
+  booker_request    String
+  turf_id           Int
+  turf              Turf               @relation(fields: [turf_id], references: [id])
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+  fields            BookingsOnFields[]
+}
+
+model Field {
+  id         Int                @id @default(autoincrement())
+  seats      Int
+  turf_id    Int
+  turf       Turf               @relation(fields: [turf_id], references: [id])
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+  bookings   BookingsOnFields[]
+}
+
+model BookingsOnFields {
+  booking_id Int
+  booking    Booking  @relation(fields: [booking_id], references: [id])
+  field_id   Int
+  field      Field    @relation(fields: [field_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([booking_id, field_id])
 }
 
 enum PRICE_TYPE {
