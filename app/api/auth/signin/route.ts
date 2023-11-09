@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import * as jose from "jose";
-import { setCookie } from "cookies-next";
+
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
