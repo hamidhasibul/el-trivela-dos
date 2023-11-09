@@ -67,6 +67,7 @@ const TurfDetailsPage = async ({ params }: { params: { slug: string } }) => {
         grounds={turf.grounds}
         openTime={turf.open_time}
         closeTime={turf.close_time}
+        slug={turf.slug}
       />
     </>
   );
