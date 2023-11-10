@@ -22,8 +22,10 @@ export default function useAvailabilities() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/turf/${slug}/availability?day=${day}&time=${time}&partySize=${partySize}`
+        `/api/turf/${slug}/availability?day=${day}&time=${time}&partySize=${partySize}`
       );
+
+      console.log(process.env.NODE_ENV);
 
       if (response.ok) {
         const data = await response.json();
