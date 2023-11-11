@@ -25,8 +25,6 @@ export default function useAvailabilities() {
         `/api/turf/${slug}/availability?day=${day}&time=${time}&partySize=${partySize}`
       );
 
-      console.log(process.env.NODE_ENV);
-
       if (response.ok) {
         const data = await response.json();
 
