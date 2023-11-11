@@ -1,6 +1,7 @@
 "use client";
 import { partySize as partySizes, times } from "@/data";
 import useAvailabilities from "@/hooks/useAvailabilities";
+import { Time, convertToDisplayTime } from "@/utils/convertToDisplayTime";
 import { CircularProgress } from "@mui/material";
 import { Ground } from "@prisma/client";
 import Link from "next/link";
@@ -140,7 +141,9 @@ const ReservationCard = ({
                       className="bg-red-600 cursor-pointer text-white text-center w-24 mr-2 mb-2 rounded p-2"
                       key={index}
                     >
-                      <p className="text-sm font-bold">{time.time}</p>
+                      <p className="text-sm font-bold">
+                        {convertToDisplayTime(time.time as Time)}
+                      </p>
                     </Link>
                   ) : (
                     <div

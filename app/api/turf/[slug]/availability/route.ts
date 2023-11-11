@@ -1,5 +1,6 @@
 import { times } from "@/data";
-import { PrismaClient } from "@prisma/client";
+import { findAvailableFields } from "@/services/turf/findAvailableFields";
+import { Field, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -20,52 +21,6 @@ export async function GET(
     });
   }
 
-  const searchTimes = times.find((t) => {
-    return t.time === time;
-  })?.searchTimes;
-
-  if (!searchTimes) {
-    return new Response(JSON.stringify({ message: "Invalid data provided" }), {
-      status: 400,
-    });
-  }
-
-  const bookings = await prisma.booking.findMany({
-    where: {
-      booking_time: {
-        gte: new Date(`${day}T${searchTimes[0]}`),
-        lte: new Date(`${day}T${searchTimes[searchTimes.length - 1]}`),
-      },
-    },
-    select: {
-      party_size: true,
-      booking_time: true,
-      fields: true,
-    },
-  });
-
-  const bookingFieldsObj: { [key: string]: { [key: number]: true } } = {};
-
-  bookings.forEach((booking) => {
-    bookingFieldsObj[booking.booking_time.toISOString()] =
-      booking.fields.reduce((obj, field) => {
-        return {
-          ...obj,
-          [field.field_id]: true,
-        };
-      }, {});
-  });
-
-  /* bookings.forEach((booking) => {
-    bookingFieldsObj[booking.booking_time.toISOString()] =
-      booking.fields.reduce((obj, field) => {
-        return {
-          ...obj,
-          [field.field_id]: true,
-        };
-      }, {});
-  }); */
-
   const turf = await prisma.turf.findUnique({
     where: { slug },
     select: { fields: true, open_time: true, close_time: true },
@@ -77,24 +32,17 @@ export async function GET(
     });
   }
 
-  const fields = turf.fields;
+  const searchTimesWithFields = (await findAvailableFields({
+    time,
+    day,
+    turf,
+  })) as Array<{ date: Date; time: string; fields: Field[] }>;
 
-  const searchTimesWithFields = searchTimes.map((searchTime) => {
-    return {
-      date: new Date(`${day}T${searchTime}`),
-      time: searchTime,
-      fields,
-    };
-  });
-
-  searchTimesWithFields.forEach((t) => {
-    t.fields = t.fields.filter((field) => {
-      if (bookingFieldsObj[t.date.toISOString()]) {
-        if (bookingFieldsObj[t.date.toISOString()][field.id]) return false;
-      }
-      return true;
+  if (!searchTimesWithFields) {
+    return new Response(JSON.stringify({ message: "Invalid data provided" }), {
+      status: 400,
     });
-  });
+  }
 
   const availabilities = searchTimesWithFields
     .map((t) => {
