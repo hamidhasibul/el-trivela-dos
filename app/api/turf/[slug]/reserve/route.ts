@@ -1,13 +1,71 @@
 import { findAvailableFields } from "@/services/turf/findAvailableFields";
 import { Field, PrismaClient } from "@prisma/client";
+import validator from "validator";
 
 const prisma = new PrismaClient();
 
-export async function GET(
+export async function POST(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
   const { searchParams } = new URL(req.url);
+
+  const {
+    bookerEmail,
+    bookerPhone,
+    bookerFirstName,
+    bookerLastName,
+    bookerRequest,
+  } = await req.json();
+
+  const errors: string[] = [];
+
+  const validationSchema = [
+    {
+      valid: validator.isEmail(bookerEmail),
+      errorMessage: "Email is not valid!",
+    },
+    {
+      valid: validator.isMobilePhone(bookerPhone),
+      errorMessage: "Phone Number is invalid!",
+    },
+    {
+      valid: validator.isLength(bookerFirstName, {
+        min: 1,
+        max: 20,
+      }),
+      errorMessage: "First Name is invalid!",
+    },
+    {
+      valid: validator.isLength(bookerLastName, {
+        min: 1,
+        max: 20,
+      }),
+      errorMessage: "Last Name is invalid!",
+    },
+    {
+      valid: validator.isLength(bookerRequest, {
+        min: 1,
+        max: 20,
+      }),
+      errorMessage: "Request is invalid!",
+    },
+  ];
+
+  validationSchema.forEach((check) => {
+    if (!check.valid) {
+      errors.push(check.errorMessage);
+    }
+  });
+
+  if (errors.length) {
+    return new Response(JSON.stringify({ message: errors[0] }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
 
   const slug = params.slug;
   const day = searchParams.get("day") as string;
@@ -17,7 +75,7 @@ export async function GET(
   const turf = await prisma.turf.findUnique({
     where: { slug },
 
-    select: { fields: true, open_time: true, close_time: true },
+    select: { fields: true, open_time: true, close_time: true, id: true },
   });
 
   if (!turf) {
@@ -95,7 +153,31 @@ export async function GET(
     }
   }
 
-  return new Response(JSON.stringify({ fieldToBook }), {
+  const booking = await prisma.booking.create({
+    data: {
+      party_size: parseInt(partySize),
+      booking_time: new Date(`${day}T${time}`),
+      booker_first_name: bookerFirstName,
+      booker_last_name: bookerLastName,
+      booker_email: bookerEmail,
+      booker_phone: bookerPhone,
+      booker_request: bookerRequest,
+      turf_id: turf.id,
+    },
+  });
+
+  const bookingsOnFieldsData = fieldToBook.map((field_id) => {
+    return {
+      field_id,
+      booking_id: booking.id,
+    };
+  });
+
+  await prisma.bookingsOnFields.createMany({
+    data: bookingsOnFieldsData,
+  });
+
+  return new Response(JSON.stringify(booking), {
     status: 200,
   });
 }
